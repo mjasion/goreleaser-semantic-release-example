@@ -32,6 +32,7 @@ jobs:
       - name: Build
         run: go build
   release:
+    needs: [ci-build]
     name: Release
     runs-on: ubuntu-latest
     steps:
