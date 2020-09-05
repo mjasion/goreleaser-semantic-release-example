@@ -1,0 +1,44 @@
+name: build
+
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  ci-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install dependencies
+        run: npm install -g semantic-release @semantic-release/github @semantic-release/release-notes-generator conventional-changelog-conventionalcommits conventional-changelog-eslint
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN_OPT: '-d'
+        run: semantic-release $DRY_RUN_OPT -b $CI_COMMIT_REF_NAME
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist

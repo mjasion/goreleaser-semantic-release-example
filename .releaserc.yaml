@@ -1,0 +1,12 @@
+---
+plugins:
+  - - "@semantic-release/commit-analyzer"
+    - preset: eslint
+  - - "@semantic-release/release-notes-generator"
+    - preset: eslint
+
+success: false
+fail: false
+npmPublish: false
+tarballDir: false
+tagFormat: "${version}"
