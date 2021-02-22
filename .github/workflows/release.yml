@@ -11,9 +11,9 @@ jobs:
   ci-build:
     strategy:
       matrix:
-        go-version: [ 1.14, 1.15.1 ]
+        go-version: [ 1.14.x, 1.15.x ]
         os: [ ubuntu-latest, ubuntu-20.04, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+      runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - run: git fetch --prune --unshallow
@@ -32,7 +32,6 @@ jobs:
       - name: Build
         run: go build
   release:
-    needs: [ci-build]
     name: Release
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +46,12 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release $DRY_RUN_OPT
+        run: semantic-release
+      - name: Release Dry Run
+        if: github.event.pull_request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release -d -b {{ github.ref }}
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
